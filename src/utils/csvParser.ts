@@ -14,7 +14,15 @@ function parseDate(dateString: string): Date {
  */
 function parseNumber(numberString: string): number {
   if (!numberString || numberString.trim() === '') return 0;
-  return parseFloat(numberString.replace(',', '.'));
+  
+  // Limpiar el string: remover espacios y reemplazar coma por punto
+  const cleanedString = numberString.trim().replace(',', '.');
+  
+  // Parsear y validar
+  const parsed = parseFloat(cleanedString);
+  
+  // Si el resultado es NaN, devolver 0
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 /**
