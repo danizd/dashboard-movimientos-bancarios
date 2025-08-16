@@ -3,7 +3,7 @@
 Una aplicación web moderna y completa para el análisis de finanzas personales construida con React, TypeScript y Mantine UI. Permite cargar, analizar y visualizar movimientos bancarios de forma intuitiva y profesional, organizados en pestañas especializadas con un diseño profesional y optimizado.
 
 ![Dashboard Preview](https://img.shields.io/badge/Status-Activo-success)
-![Version](https://img.shields.io/badge/Version-2.1.0-blue)
+![Version](https://img.shields.io/badge/Version-2.2.0-blue)
 ![React](https://img.shields.io/badge/React-19.1.1-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
 
@@ -138,8 +138,9 @@ Los filtros principales (rango de fechas, selector de cuentas, etc.) están ubic
 ### **Prerrequisitos**
 - Node.js 18+ 
 - npm o yarn
+- **Docker** (para despliegue con contenedores)
 
-### **Instalación**
+### **Método 1: Instalación Tradicional**
 
 1. **Clona el repositorio**:
 ```bash
@@ -159,8 +160,61 @@ npm run dev
 
 4. **Abre tu navegador en**: `http://localhost:5173`
 
+### **Método 2: Despliegue con Docker (Recomendado para Producción)**
+
+#### **🐳 Opción A: Docker Compose (Más Simple)**
+```bash
+# Clona el repositorio
+git clone https://github.com/danizd/dashboard-movimientos-bancarios.git
+cd dashboard-movimientos-bancarios
+
+# Ejecuta con Docker Compose
+docker-compose up -d
+
+# Accede a http://localhost:3000
+```
+
+#### **🛠️ Opción B: Scripts Automatizados**
+
+**En Linux/macOS:**
+```bash
+# Hacer ejecutable el script
+chmod +x docker-deploy.sh
+
+# Despliegue completo
+./docker-deploy.sh deploy
+
+# O comandos individuales
+./docker-deploy.sh build    # Solo construir
+./docker-deploy.sh run      # Solo ejecutar
+./docker-deploy.sh status   # Ver estado
+```
+
+**En Windows:**
+```cmd
+# Despliegue completo
+docker-deploy.bat deploy
+
+# O comandos individuales
+docker-deploy.bat build     # Solo construir
+docker-deploy.bat run       # Solo ejecutar
+docker-deploy.bat status    # Ver estado
+```
+
+#### **🔧 Opción C: Docker Manual**
+```bash
+# Construir imagen
+docker build -t dashboard-financiero:latest .
+
+# Ejecutar contenedor
+docker run -d -p 3000:80 --name dashboard-financiero dashboard-financiero:latest
+
+# Accede a http://localhost:3000
+```
+
 ### **Comandos Disponibles**
 
+#### **Desarrollo Local**
 ```bash
 # Desarrollo
 npm run dev          # Servidor de desarrollo con hot reload
@@ -171,6 +225,34 @@ npm run preview      # Preview del build de producción
 
 # Calidad de Código
 npm run lint         # Ejecuta ESLint para verificar código
+```
+
+#### **Docker**
+```bash
+# Docker Compose (Recomendado)
+docker-compose up -d        # Ejecutar en background
+docker-compose up           # Ejecutar con logs
+docker-compose down         # Parar contenedores
+docker-compose logs -f      # Ver logs en tiempo real
+
+# Scripts Automatizados
+# Linux/macOS
+./docker-deploy.sh deploy   # Despliegue completo
+./docker-deploy.sh status   # Estado del contenedor
+./docker-deploy.sh logs     # Ver logs
+./docker-deploy.sh clean    # Limpiar recursos
+
+# Windows
+docker-deploy.bat deploy    # Despliegue completo
+docker-deploy.bat status    # Estado del contenedor
+docker-deploy.bat logs      # Ver logs
+docker-deploy.bat clean     # Limpiar recursos
+
+# Makefile (Linux/macOS)
+make up                     # Ejecutar con compose
+make build                  # Solo construir imagen
+make logs                   # Ver logs
+make clean                  # Limpiar recursos
 ```
 
 ## 📁 Estructura del Proyecto
@@ -197,7 +279,16 @@ src/
 │   └── transaction.ts                 # Tipos TypeScript
 ├── utils/
 │   └── csvParser.ts                   # Utilidades para procesar CSV
-└── main.tsx                           # Punto de entrada de la aplicación
+├── main.tsx                           # Punto de entrada de la aplicación
+│
+├── docker/                            # Configuración Docker
+│   ├── Dockerfile                     # Imagen Docker multi-stage
+│   ├── docker-compose.yml             # Orquestación de servicios
+│   ├── nginx.conf                     # Configuración Nginx optimizada
+│   ├── .dockerignore                  # Archivos excluidos del build
+│   ├── docker-deploy.sh               # Script automatizado Linux/macOS
+│   ├── docker-deploy.bat              # Script automatizado Windows
+│   └── Makefile                       # Comandos simplificados
 ```
 
 ### **Arquitectura de Componentes**
@@ -316,23 +407,79 @@ Los indicadores se calculan en `KpiCards.tsx` basándose en el estado filtrado.
 
 ## 🚀 Despliegue
 
-### **Vercel (Recomendado)**
+### **🐳 Docker (Recomendado)**
+
+#### **Despliegue Rápido**
+```bash
+# Usando Docker Compose (más simple)
+docker-compose up -d
+
+# Usando scripts automatizados
+# Linux/macOS
+./docker-deploy.sh deploy
+
+# Windows
+docker-deploy.bat deploy
+
+# Acceder a http://localhost:3000
+```
+
+#### **Características del Contenedor Docker**
+- ✅ **Multi-stage build** para optimizar tamaño
+- ✅ **Nginx optimizado** para SPAs con configuración de cache
+- ✅ **Health checks** automáticos
+- ✅ **Compresión gzip** habilitada
+- ✅ **Headers de seguridad** configurados
+- ✅ **Logs estructurados** para monitoreo
+- ✅ **Auto-restart** en caso de fallos
+
+#### **Configuraciones Docker Disponibles**
+
+**docker-compose.yml:**
+- Configuración lista para producción
+- Health checks automáticos
+- Restart policies configuradas
+- Networks aisladas
+- Volúmenes para persistencia futura
+
+**Scripts de automatización:**
+- `docker-deploy.sh` (Linux/macOS) con logging colorizado
+- `docker-deploy.bat` (Windows) con comandos equivalentes
+- `Makefile` con comandos simplificados
+
+### **☁️ Plataformas Cloud**
+
+#### **Vercel**
 ```bash
 npm run build
 npx vercel --prod
 ```
 
-### **Netlify**
+#### **Netlify**
 ```bash
 npm run build
 # Sube la carpeta dist/
 ```
 
-### **GitHub Pages**
+#### **Docker en Producción**
 ```bash
-npm run build
-# Configura GitHub Pages para servir desde dist/
+# Construir para producción
+docker build -t dashboard-financiero:production .
+
+# Ejecutar en servidor
+docker run -d \
+  --name dashboard-prod \
+  --restart unless-stopped \
+  -p 80:80 \
+  dashboard-financiero:production
 ```
+
+#### **AWS ECS / Google Cloud Run**
+El contenedor Docker está optimizado para plataformas cloud:
+- Imagen ligera basada en Alpine Linux
+- Puerto 80 expuesto
+- Health checks configurados
+- Logs estructurados para CloudWatch/Cloud Logging
 
 ## 🤝 Contribuciones
 
@@ -370,6 +517,23 @@ Las contribuciones son bienvenidas. Para contribuir:
 
 ## 📋 Changelog
 
+### **v2.2.0** (Agosto 2025) - **Dockerización Completa**
+- 🐳 **NUEVO**: Dockerización completa de la aplicación
+  - Dockerfile multi-stage optimizado con Nginx y Alpine Linux
+  - docker-compose.yml con health checks y auto-restart
+  - Configuración Nginx optimizada para SPAs con cache y compresión
+  - Scripts de automatización para Linux/macOS (docker-deploy.sh) y Windows (docker-deploy.bat)
+  - Makefile con comandos simplificados
+  - .dockerignore optimizado para builds eficientes
+- ☁️ **NUEVO**: Preparación para despliegue en cloud
+  - Imagen optimizada para AWS ECS, Google Cloud Run
+  - Health checks configurados para load balancers
+  - Logs estructurados para monitoreo en cloud
+  - Puerto 80 expuesto y configuración de producción lista
+- 🔧 **MEJORADO**: Documentación completa de Docker en README
+  - Múltiples métodos de despliegue (Compose, scripts, manual)
+  - Comandos disponibles para todos los sistemas operativos
+  - Guías de despliegue en diferentes plataformas cloud
 ### **v2.1.0** (Agosto 2025) - **Diseño Profesional y Optimizaciones**
 - 🎨 **NUEVO**: Header profesional con gradiente y efectos glass morphism
 - 🦶 **NUEVO**: Footer informativo con enlaces y copyright

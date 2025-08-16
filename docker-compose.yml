@@ -1,0 +1,55 @@
+# Docker Compose para Dashboard Financiero Personal
+# Versión 3.8 para compatibilidad moderna
+
+version: '3.8'
+
+services:
+  # Servicio principal del dashboard
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dashboard-financiero
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    networks:
+      - dashboard-network
+    labels:
+      - "com.dashboard.description=Dashboard Financiero Personal"
+      - "com.dashboard.version=2.1.0"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Servicio opcional: Proxy reverso con Traefik (comentado por defecto)
+  # traefik:
+  #   image: traefik:v2.10
+  #   container_name: dashboard-traefik
+  #   command:
+  #     - "--api.insecure=true"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #   ports:
+  #     - "80:80"
+  #     - "8080:8080"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - dashboard-network
+  #   labels:
+  #     - "traefik.enable=true"
+
+networks:
+  dashboard-network:
+    driver: bridge
+    name: dashboard-net
+
+# Volúmenes para persistir datos si es necesario en el futuro
+volumes:
+  dashboard-data:
+    name: dashboard-data
