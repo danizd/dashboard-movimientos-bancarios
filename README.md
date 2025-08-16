@@ -1,22 +1,88 @@
 # 📊 Dashboard Financiero Personal
 
-Una aplicación web moderna y completa para el análisis de finanzas personales construida con React, TypeScript y Mantine UI. Permite cargar, analizar y visualizar movimientos bancarios de forma intuitiva y profesional.
+Una aplicación web moderna y completa para el análisis de finanzas personales construida con React, TypeScript y Mantine UI. Permite cargar, analizar y visualizar movimientos bancarios de forma intuitiva y profesional, organizados en pestañas especializadas con un diseño profesional y optimizado.
 
 ![Dashboard Preview](https://img.shields.io/badge/Status-Activo-success)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Version](https://img.shields.io/badge/Version-2.1.0-blue)
+![React](https://img.shields.io/badge/React-19.1.1-61dafb)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
+
+## 📸 Capturas de Pantalla
+
+### 🗂️ Vista General con Pestañas
+*Interfaz principal del dashboard mostrando la organización por pestañas y el header profesional*
+
+![Vista General](Screenshots/Captura1.png)
+
+### 📊 Pestaña Resumen General
+*Dashboard principal con KPIs, gráficos combinados y evolución del saldo*
+
+![Resumen General](Screenshots/Captura2.png)
+
+### 🔬 Pestaña Análisis de Gastos
+*Análisis detallado con gráficos por categorías, sunburst y mapa de calor*
+
+![Análisis de Gastos](Screenshots/Captura3.png)
+
+## ✨ Características Principales
+
+### 🎨 **Diseño Profesional**
+- **Header Moderno**: Gradiente azul profesional con efectos glass morphism y backdrop blur
+- **Footer Informativo**: Enlaces útiles, información de copyright y detalles del proyecto
+- **Layout Responsive**: Diseño optimizado para todas las pantallas con altura completa
+- **Iconografía Consistente**: Tabler Icons en toda la aplicación
+- **Estética Moderna**: Uso de gradientes, sombras y efectos visuales profesionales
+
+### ⚡ **Optimizaciones de Rendimiento**
+- **Límites Inteligentes**: Los gráficos se limitan automáticamente a 36 meses (3 años) para mejor legibilidad cuando hay grandes volúmenes de datos
+- **Feedback Visual**: Indicadores informativos cuando se aplican limitaciones de datos mostrando "X de Y meses totales"
+- **Mapa de Calor Optimizado**: Limitado a 3 años para evitar problemas de rendimiento y sobrecarga visual
+- **Carga Eficiente**: Procesamiento optimizado de grandes datasets con filtrado inteligente
+- **Memoria Optimizada**: useMemo estratégico para evitar recálculos innecesarios
+
+### 🗂️ **Organización por Pestañas**rd Financiero Personal
+
+Una aplicación web moderna y completa para el análisis de finanzas personales construida con React, TypeScript y Mantine UI. Permite cargar, analizar y visualizar movimientos bancarios de forma intuitiva y profesional, organizados en pestañas especializadas.
+
+![Dashboard Preview](https://img.shields.io/badge/Status-Activo-success)
+![Version](https://img.shields.io/badge/Version-2.1.0-blue)
 ![React](https://img.shields.io/badge/React-19.1.1-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
 
 ## ✨ Características Principales
 
-### 📈 **Visualizaciones Avanzadas**
-- **Evolución del Saldo**: Línea temporal del balance financiero
-- **Ingresos vs Gastos**: Gráfico combinado con línea de ahorro neto
-- **Top 10 Gastos por Categoría**: Barras horizontales de principales gastos
-- **Distribución de Gastos**: Gráfico donut con porcentajes por categoría
-- **Mapa de Calor Calendario**: Visualización de días con mayor gasto
-- **Comparativa Anual**: Gráfico multilínea de gastos por año
-- **Gastos por Categoría por Año**: Análisis temporal con selección de categorías
+### �️ **Organización por Pestañas**
+La aplicación está estructurada en tres pestañas principales que proporcionan diferentes perspectivas de análisis:
+
+#### 📊 **Pestaña 1: Resumen General**
+*Vista principal que responde a "¿Cómo voy?"*
+- **Tarjetas KPI**: Saldo actual, Ingresos, Gastos y Ahorro del período
+- **Gráfico Ingresos vs Gastos**: Barras mensuales con línea de ahorro superpuesta y leyenda horizontal optimizada en la parte superior
+- **Evolución del Saldo**: Línea temporal del balance financiero por mes con optimización automática para grandes datasets
+
+#### 🔬 **Pestaña 2: Análisis de Gastos**
+*Dedicada a responder "¿En qué y cuándo gasto mi dinero?"*
+- **Gastos por Categoría**: Gráfico de barras horizontales de principales gastos
+- **Evolución Mensual por Categoría**: Análisis temporal con selector múltiple de categorías para comparativas
+- **Desglose Jerárquico**: Gráfico Sunburst por categoría y subcategoría
+- **Mapa de Calor Calendario**: Patrones de gasto diarios para identificar tendencias (optimizado para 3 años)
+
+#### 🧾 **Pestaña 3: Todas las Transacciones**
+*Herramienta completa de exploración de datos*
+- **Tabla Completa**: Con todos los filtros, ordenación y funcionalidades
+- **Espacio Optimizado**: Diseñada para visualización óptima en cualquier pantalla
+- **Análisis Detallado**: Acceso granular a cada transacción
+
+### 🎛️ **Filtros Globales**
+Los filtros principales (rango de fechas, selector de cuentas, etc.) están ubicados **fuera** del componente de pestañas, aplicándose a todas las vistas simultáneamente para mantener una experiencia de análisis consistente.
+
+### � **Visualizaciones Avanzadas**
+- **Gráficos Combinados**: Barras e líneas superpuestas para análisis multi-dimensional
+- **Leyendas Optimizadas**: Posicionamiento horizontal en la parte superior para mejor aprovechamiento del espacio
+- **Interactividad**: Tooltips detallados con formato de moneda española
+- **Responsividad**: Adaptación automática a diferentes tamaños de pantalla
+- **Animaciones**: Transiciones suaves con Nivo para mejor UX
+- **Rendimiento Inteligente**: Limitación automática de datos para mantener legibilidad en gráficos con muchos puntos
 
 ### 🔍 **Sistema de Filtros Avanzado**
 - **Búsqueda Global**: Debounced search por concepto, categoría y cuenta
@@ -38,7 +104,7 @@ Una aplicación web moderna y completa para el análisis de finanzas personales 
 - **Ingresos del Periodo**: Total de entradas en el rango seleccionado
 - **Gastos del Periodo**: Total de salidas en el rango seleccionado
 - **Ahorro Neto**: Diferencia entre ingresos y gastos
-- **Categorización Automática**: Análisis inteligente de transacciones
+- **Indicadores Visuales**: Iconos y colores intuitivos para cada métrica
 
 ## 🛠️ Stack Tecnológico
 
@@ -60,6 +126,7 @@ Una aplicación web moderna y completa para el análisis de finanzas personales 
   - `@nivo/bar` - Gráficos de barras
   - `@nivo/pie` - Gráficos circulares y donut
   - `@nivo/calendar` - Mapas de calor de calendario
+  - `@nivo/sunburst` - Gráficos jerárquicos Sunburst
 
 ### **Estado y Datos**
 - **Zustand 5.0.7** - Gestión de estado ligera y eficiente
@@ -112,21 +179,46 @@ npm run lint         # Ejecuta ESLint para verificar código
 src/
 ├── components/
 │   ├── Dashboard/
-│   │   ├── ChartsGrid.tsx         # Grid con todos los gráficos
-│   │   ├── TransactionsTable.tsx  # Tabla avanzada de transacciones
-│   │   ├── KpiCards.tsx          # Tarjetas de métricas
-│   │   ├── Filters.tsx           # Controles de filtrado
-│   │   └── FileUploader.tsx      # Componente de carga de archivos
+│   │   ├── TabbedDashboardView.tsx    # Componente principal con pestañas
+│   │   ├── OverviewTab.tsx            # Pestaña 1: Resumen General
+│   │   ├── ExpensesAnalysisTab.tsx    # Pestaña 2: Análisis de Gastos
+│   │   ├── TransactionsTable.tsx      # Pestaña 3: Todas las Transacciones
+│   │   ├── KpiCards.tsx               # Tarjetas de métricas (KPIs)
+│   │   ├── Filters.tsx                # Controles de filtrado globales
+│   │   ├── ChartsGrid.tsx             # Grid legacy (mantenido por compatibilidad)
+│   │   └── DashboardView.tsx          # Vista legacy (mantenida por compatibilidad)
+│   ├── FileUploader/
+│   │   └── FileUploader.tsx           # Componente de carga de archivos
 │   └── Layout/
-│       └── Layout.tsx            # Layout principal centrado
+│       └── Layout.tsx                 # Layout principal con header
 ├── store/
-│   └── financialStore.ts         # Estado global con Zustand
+│   └── financialStore.ts              # Estado global con Zustand
 ├── types/
-│   └── transaction.ts            # Tipos TypeScript
+│   └── transaction.ts                 # Tipos TypeScript
 ├── utils/
-│   └── csvParser.ts              # Utilidades para procesar CSV
-└── main.tsx                      # Punto de entrada de la aplicación
+│   └── csvParser.ts                   # Utilidades para procesar CSV
+└── main.tsx                           # Punto de entrada de la aplicación
 ```
+
+### **Arquitectura de Componentes**
+
+#### **🗂️ TabbedDashboardView**
+Componente principal que orquesta las pestañas y mantiene los filtros globales fuera de las pestañas para consistencia entre vistas.
+
+#### **📊 OverviewTab**
+- Incluye `KpiCards` para métricas principales
+- Gráfico combinado de ingresos vs gastos con línea de ahorro
+- Evolución mensual del saldo
+
+#### **🔬 ExpensesAnalysisTab**
+- Gastos por categoría (barras horizontales)
+- Gráfico Sunburst jerárquico por categoría/subcategoría
+- Mapa de calor de calendario para patrones de gasto
+
+#### **🧾 TransactionsTable**
+- Tabla completa con filtros avanzados
+- Optimizada para visualización y exploración de datos
+- Sistema de paginación y ordenamiento inteligente
 
 ## 📊 Formato de Datos CSV
 
@@ -152,12 +244,46 @@ El dashboard espera archivos CSV con las siguientes columnas:
 - ✅ **Headers**: Primera fila como nombres de columna
 - ✅ **Validación**: Filtrado automático de filas inválidas
 - ✅ **Ordenamiento**: Por fecha (más reciente primero)
+- ✅ **Formatos de Fecha**: Soporte para DD/MM/YYYY y DD-MM-YYYY
+- ✅ **Robustez**: Manejo de errores y validación de datos
 
 ## 🎨 Características de UX/UI
 
+### **🗂️ Navegación por Pestañas**
+- **Persistencia de Filtros**: Los filtros globales se mantienen al cambiar entre pestañas
+- **Iconografía Intuitiva**: Cada pestaña tiene íconos descriptivos y emojis para fácil identificación
+- **Diseño de Pills**: Pestañas con estilo moderno y redondeado
+- **Carga Lazy**: Los componentes de cada pestaña se cargan según necesidad
+
+### **📊 Experiencia de Análisis**
+- **Flujo Lógico**: Desde vista general → análisis específico → datos detallados
+- **Consistencia Visual**: Paleta de colores y formatos unificados entre pestañas
+- **Tooltips Contextuales**: Información detallada al hacer hover en gráficos
+- **Responsive**: Cada pestaña optimizada para diferentes tamaños de pantalla
+
+### **🎯 Casos de Uso por Pestaña**
+
+#### **📊 Resumen General**
+*"¿Cómo voy financieramente?"*
+- Revisión rápida del estado actual
+- Identificación de tendencias principales
+- Comparativa ingresos vs gastos mensual
+
+#### **🔬 Análisis de Gastos**
+*"¿En qué y cuándo gasto mi dinero?"*
+- Identificación de categorías problemáticas
+- Análisis de patrones temporales de gasto
+- Desglose jerárquico detallado
+
+#### **🧾 Todas las Transacciones**
+*"¿Qué operaciones específicas he realizado?"*
+- Búsqueda y filtrado granular
+- Auditoría de movimientos específicos
+- Exportación y análisis detallado
+
 ### **Diseño Responsive**
 - **Desktop First**: Optimizado para pantallas grandes
-- **Centrado**: Layout de 1280px centrado en la página
+- **Centrado**: Layout con máximo 1280px para legibilidad óptima
 - **Full Width**: Gráficos que aprovechan todo el ancho disponible
 - **Mobile Friendly**: Adaptable a dispositivos móviles
 
@@ -221,22 +347,52 @@ Las contribuciones son bienvenidas. Para contribuir:
 ## 📝 Roadmap
 
 ### **Próximas Características**
-- [ ] **Exportación de Reportes**: PDF y Excel
-- [ ] **Comparativas Anuales**: Más opciones de análisis temporal
-- [ ] **Categorización Automática**: IA para clasificar transacciones
-- [ ] **Presupuestos**: Gestión de presupuestos por categoría
-- [ ] **Alertas**: Notificaciones de gastos inusuales
+- [ ] **Exportación de Reportes**: PDF y Excel con datos de cada pestaña
+- [ ] **Comparativas Personalizadas**: Selección de períodos específicos
+- [ ] **Categorización Automática**: IA para clasificar transacciones nuevas
+- [ ] **Presupuestos**: Gestión de presupuestos por categoría con alertas
+- [ ] **Predicciones**: Proyecciones de gastos basadas en histórico
 - [ ] **Múltiples Bancos**: Soporte para diferentes formatos CSV
+- [ ] **Sincronización**: Conexión directa con APIs bancarias
+
+### **Mejoras de UX/UI**
+- [ ] **Personalización**: Configuración de vista por defecto en pestañas
+- [ ] **Dashboards Personalizados**: Drag & drop de widgets
+- [ ] **Temas**: Múltiples esquemas de color
+- [ ] **Tutoriales**: Onboarding interactivo
 
 ### **Mejoras Técnicas**
-- [ ] **Tests**: Suite de testing completa
-- [ ] **PWA**: Aplicación web progresiva
-- [ ] **Dark Mode**: Tema oscuro
-- [ ] **i18n**: Soporte multiidioma
+- [ ] **Tests**: Suite de testing completa con Jest y Testing Library
+- [ ] **PWA**: Aplicación web progresiva con offline support
+- [ ] **Dark Mode**: Tema oscuro completo
+- [ ] **i18n**: Soporte multiidioma (inglés, catalán)
+- [ ] **Performance**: Lazy loading y virtualización para tablas grandes
 
 ## 📋 Changelog
 
-### **v1.0.0** (Agosto 2025)
+### **v2.1.0** (Agosto 2025) - **Diseño Profesional y Optimizaciones**
+- 🎨 **NUEVO**: Header profesional con gradiente y efectos glass morphism
+- 🦶 **NUEVO**: Footer informativo con enlaces y copyright
+- 📊 **MEJORADO**: Leyendas horizontales en gráficos combinados para mejor aprovechamiento del espacio
+- ⚡ **NUEVO**: Optimizaciones de rendimiento para datasets grandes
+  - Limitación automática a 36 meses en gráficos temporales
+  - Limitación a 3 años en mapas de calor de calendario
+  - Feedback visual cuando se aplican limitaciones
+- 🔧 **MEJORADO**: Parser CSV con soporte para múltiples formatos de fecha (DD/MM/YYYY y DD-MM-YYYY)
+- 🎯 **MEJORADO**: Layout responsive con altura completa y espaciado optimizado
+- 💫 **MEJORADO**: Efectos visuales y estética profesional en toda la aplicación
+
+### **v2.0.0** (Agosto 2025) - **Nueva Arquitectura de Pestañas**
+- 🗂️ **NUEVA**: Arquitectura de pestañas especializadas
+  - 📊 Pestaña "Resumen General" con KPIs y gráficos principales
+  - 🔬 Pestaña "Análisis de Gastos" con Sunburst y mapa de calor
+  - 🧾 Pestaña "Todas las Transacciones" dedicada exclusivamente a datos
+- 🎯 **MEJORADO**: Filtros globales aplicados a todas las pestañas
+- 📈 **NUEVO**: Gráfico Sunburst jerárquico para categorías/subcategorías
+- 🔄 **MEJORADO**: Experiencia de usuario más intuitiva y organizada
+- 💫 **NUEVO**: Animaciones y transiciones mejoradas entre pestañas
+
+### **v1.0.0** (Agosto 2025) - **Lanzamiento Inicial**
 - ✨ Dashboard completo con 7 tipos de gráficos
 - 🔍 Sistema de filtros avanzado con búsqueda debounced
 - 📊 Tabla de transacciones con ordenamiento y paginación

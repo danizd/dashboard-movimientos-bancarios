@@ -1,0 +1,376 @@
+import { Stack, Card, Title, Box, Text, useMantineTheme } from '@mantine/core';
+import { ResponsiveLine } from '@nivo/line';
+import { ResponsiveBar } from '@nivo/bar';
+import { useFinancialStore } from '../../store/financialStore';
+import KpiCards from './KpiCards';
+import { useMemo } from 'react';
+import { format, startOfMonth, endOfMonth, eachMonthOfInterval } from 'date-fns';
+
+export default function OverviewTab() {
+  const { filteredTransactions } = useFinancialStore();
+  const theme = useMantineTheme();
+
+  // Función para formatear moneda
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // 1. Datos para evolución del saldo (agregados por mes)
+  const { balanceEvolutionData, balanceMonthsInfo } = useMemo(() => {
+    if (filteredTransactions.length === 0) return { balanceEvolutionData: [], balanceMonthsInfo: { totalMonths: 0, displayedMonths: 0, isLimited: false } };
+
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => 
+      a.fechaContable.getTime() - b.fechaContable.getTime()
+    );
+
+    const firstDate = sortedTransactions[0].fechaContable;
+    const lastDate = sortedTransactions[sortedTransactions.length - 1].fechaContable;
+    
+    const months = eachMonthOfInterval({ start: firstDate, end: lastDate });
+    
+    // Si hay más de 36 meses (3 años), usar solo los últimos 36 para mejor visualización
+    const monthsToShow = months.length > 36 ? months.slice(-36) : months;
+    const isLimited = months.length > 36;
+    
+    const monthlyData = monthsToShow.map(month => {
+      const monthStart = startOfMonth(month);
+      const monthEnd = endOfMonth(month);
+      
+      const monthTransactions = sortedTransactions.filter(t => 
+        t.fechaContable >= monthStart && t.fechaContable <= monthEnd
+      );
+      
+      const lastTransaction = monthTransactions[monthTransactions.length - 1];
+      const balance = lastTransaction ? lastTransaction.saldo : 0;
+      
+      return {
+        x: format(month, 'MMM yyyy'),
+        y: Math.round(balance),
+      };
+    });
+
+    const data = [{
+      id: 'saldo',
+      color: theme?.colors?.blue?.[6] || '#228be6',
+      data: monthlyData,
+    }];
+
+    return { 
+      balanceEvolutionData: data,
+      balanceMonthsInfo: {
+        totalMonths: months.length,
+        displayedMonths: monthsToShow.length,
+        isLimited
+      }
+    };
+  }, [filteredTransactions, theme?.colors?.blue]);
+
+  // 2. Datos para gráfico combinado: Ingresos vs Gastos Mensuales + Ahorro
+  const { incomeExpenseData, savingsLineData, monthsInfo } = useMemo(() => {
+    if (filteredTransactions.length === 0) return { incomeExpenseData: [], savingsLineData: [], monthsInfo: { totalMonths: 0, displayedMonths: 0, isLimited: false } };
+
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => 
+      a.fechaContable.getTime() - b.fechaContable.getTime()
+    );
+
+    const firstDate = sortedTransactions[0].fechaContable;
+    const lastDate = sortedTransactions[sortedTransactions.length - 1].fechaContable;
+    
+    const months = eachMonthOfInterval({ start: firstDate, end: lastDate });
+    
+    // Si hay más de 36 meses (3 años), usar solo los últimos 36 para mejor visualización
+    const monthsToShow = months.length > 36 ? months.slice(-36) : months;
+    const isLimited = months.length > 36;
+    
+    const monthlyData = monthsToShow.map(month => {
+      const monthStart = startOfMonth(month);
+      const monthEnd = endOfMonth(month);
+      
+      const monthTransactions = sortedTransactions.filter(t => 
+        t.fechaContable >= monthStart && t.fechaContable <= monthEnd
+      );
+      
+      const totalIncome = monthTransactions
+        .filter(t => t.importe > 0)
+        .reduce((sum, t) => sum + t.importe, 0);
+        
+      const totalExpenses = Math.abs(monthTransactions
+        .filter(t => t.importe < 0)
+        .reduce((sum, t) => sum + t.importe, 0));
+        
+      const savings = totalIncome - totalExpenses;
+      const monthLabel = format(month, 'MMM yyyy');
+      
+      return {
+        month: monthLabel,
+        ingresos: Math.round(totalIncome),
+        gastos: Math.round(totalExpenses),
+        ahorro: Math.round(savings)
+      };
+    });
+
+    // Datos para las barras (ingresos y gastos)
+    const barData = monthlyData.map(({ month, ingresos, gastos }) => ({
+      month,
+      ingresos,
+      gastos
+    }));
+
+    // Datos para la línea de ahorro
+    const lineData = [{
+      id: 'ahorro',
+      color: theme?.colors?.green?.[6] || '#40c057',
+      data: monthlyData.map(({ month, ahorro }) => ({
+        x: month,
+        y: ahorro
+      }))
+    }];
+
+    return {
+      incomeExpenseData: barData,
+      savingsLineData: lineData,
+      monthsInfo: {
+        totalMonths: months.length,
+        displayedMonths: monthsToShow.length,
+        isLimited
+      }
+    };
+  }, [filteredTransactions, theme?.colors?.green]);
+
+  return (
+    <Stack gap="lg">
+      {/* Tarjetas de KPIs */}
+      <KpiCards />
+
+      {/* Gráfico combinado: Ingresos vs Gastos + Ahorro */}
+      <Card withBorder padding="lg" radius="md">
+        <Title order={4} mb="md">Ingresos vs. Gastos Mensuales + Ahorro Neto</Title>
+        {monthsInfo.isLimited && (
+          <Text size="sm" c="dimmed" mb="md">
+            📊 Mostrando últimos 36 meses para mejor legibilidad ({monthsInfo.displayedMonths} de {monthsInfo.totalMonths} meses totales)
+          </Text>
+        )}
+        <Box h={500} style={{ position: 'relative' }}>
+          {/* Gráfico de barras para ingresos y gastos */}
+          <ResponsiveBar
+            data={incomeExpenseData}
+            keys={['ingresos', 'gastos']}
+            indexBy="month"
+            margin={{ top: 80, right: 50, bottom: 60, left: 80 }}
+            padding={0.3}
+            groupMode="grouped"
+            colors={[theme?.colors?.green?.[6] || '#40c057', theme?.colors?.red?.[6] || '#fa5252']}
+            borderRadius={4}
+            borderWidth={1}
+            borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
+            axisTop={null}
+            axisRight={null}
+            axisBottom={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: -45,
+            }}
+            axisLeft={{
+              tickSize: 5,
+              tickPadding: 5,
+              format: (value) => formatCurrency(value),
+            }}
+            enableLabel={false}
+            legends={[
+              {
+                dataFrom: 'keys',
+                anchor: 'top',
+                direction: 'row',
+                justify: false,
+                translateX: 0,
+                translateY: -60,
+                itemsSpacing: 20,
+                itemWidth: 100,
+                itemHeight: 20,
+                itemDirection: 'left-to-right',
+                itemOpacity: 0.85,
+                symbolSize: 18,
+                effects: [
+                  {
+                    on: 'hover',
+                    style: {
+                      itemOpacity: 1
+                    }
+                  }
+                ]
+              }
+            ]}
+            animate={true}
+            motionConfig="gentle"
+            tooltip={({ id, value, color, data }) => (
+              <div
+                style={{
+                  background: 'white',
+                  padding: '12px 16px',
+                  border: `2px solid ${color}`,
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                }}
+              >
+                <strong>{data.month} - {id}</strong>
+                <br />
+                <span style={{ color }}>
+                  {formatCurrency(value)}
+                </span>
+              </div>
+            )}
+          />
+          
+          {/* Línea de ahorro superpuesta */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: 'none'
+          }}>
+            <ResponsiveLine
+              data={savingsLineData}
+              margin={{ top: 80, right: 50, bottom: 60, left: 80 }}
+              xScale={{ type: 'point' }}
+              yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+              curve="catmullRom"
+              axisTop={null}
+              axisRight={{
+                tickSize: 5,
+                tickPadding: 5,
+                format: (value) => formatCurrency(value),
+                legend: 'Ahorro Neto',
+                legendOffset: 40,
+                legendPosition: 'middle'
+              }}
+              axisBottom={null}
+              axisLeft={null}
+              colors={[theme?.colors?.blue?.[6] || '#228be6']}
+              pointSize={6}
+              pointColor={{ theme: 'background' }}
+              pointBorderWidth={2}
+              pointBorderColor={{ from: 'serieColor' }}
+              enablePoints={true}
+              enableArea={false}
+              lineWidth={3}
+              enableGridX={false}
+              enableGridY={false}
+              enableCrosshair={false}
+              useMesh={false}
+              animate={true}
+              motionConfig="gentle"
+              legends={[
+                {
+                  anchor: 'top',
+                  direction: 'row',
+                  justify: false,
+                  translateX: 120,
+                  translateY: -60,
+                  itemsSpacing: 20,
+                  itemWidth: 100,
+                  itemHeight: 20,
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 0.85,
+                  symbolSize: 18,
+                  symbolShape: 'circle',
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemOpacity: 1
+                      }
+                    }
+                  ]
+                }
+              ]}
+              tooltip={({ point }) => (
+                <div
+                  style={{
+                    background: 'white',
+                    padding: '12px 16px',
+                    border: `2px solid ${theme?.colors?.blue?.[6] || '#228be6'}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    pointerEvents: 'auto'
+                  }}
+                >
+                  <strong>{point.data.xFormatted}</strong>
+                  <br />
+                  <span style={{ color: theme?.colors?.blue?.[6] || '#228be6' }}>
+                    Ahorro: {formatCurrency(point.data.y as number)}
+                  </span>
+                </div>
+              )}
+            />
+          </div>
+        </Box>
+      </Card>
+
+      {/* Evolución del saldo */}
+      <Card withBorder padding="lg" radius="md">
+        <Title order={4} mb="md">Evolución del Saldo por Mes</Title>
+        {balanceMonthsInfo.isLimited && (
+          <Text size="sm" c="dimmed" mb="md">
+            📊 Mostrando últimos 36 meses para mejor legibilidad ({balanceMonthsInfo.displayedMonths} de {balanceMonthsInfo.totalMonths} meses totales)
+          </Text>
+        )}
+        <Box h={400}>
+          <ResponsiveLine
+            data={balanceEvolutionData}
+            margin={{ top: 20, right: 30, bottom: 60, left: 80 }}
+            xScale={{ type: 'point' }}
+            yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+            curve="catmullRom"
+            axisTop={null}
+            axisRight={null}
+            axisBottom={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: -45,
+            }}
+            axisLeft={{
+              tickSize: 5,
+              tickPadding: 5,
+              format: (value) => formatCurrency(value),
+            }}
+            colors={[theme?.colors?.blue?.[6] || '#228be6']}
+            pointSize={0}
+            enablePoints={false}
+            enableArea={true}
+            areaOpacity={0.2}
+            enableGridX={false}
+            enableGridY={true}
+            enableCrosshair={true}
+            useMesh={true}
+            animate={true}
+            motionConfig="gentle"
+            tooltip={({ point }) => (
+              <div
+                style={{
+                  background: 'white',
+                  padding: '12px 16px',
+                  border: `2px solid ${point.color}`,
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                }}
+              >
+                <strong>{point.data.xFormatted}</strong>
+                <br />
+                <span style={{ color: point.color }}>
+                  Saldo: {formatCurrency(point.data.y as number)}
+                </span>
+              </div>
+            )}
+          />
+        </Box>
+      </Card>
+    </Stack>
+  );
+}

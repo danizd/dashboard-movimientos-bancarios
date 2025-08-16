@@ -48,12 +48,10 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
   setTransactions: (transactions) => {
     set({ transactions });
     
-    // Seleccionar automáticamente el último año (más reciente)
-    const years = Array.from(new Set(transactions.map(t => getYear(t.fechaContable)))).sort((a, b) => b - a);
-    const latestYear = years.length > 0 ? years[0] : null;
-    
+    // NO seleccionar automáticamente ningún año - mostrar todos por defecto
+    // Los usuarios pueden filtrar por año específico si lo desean
     set((state) => ({
-      filters: { ...state.filters, selectedYear: latestYear }
+      filters: { ...state.filters, selectedYear: null }
     }));
     
     // Aplicar filtros automáticamente cuando se cargan nuevos datos

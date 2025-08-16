@@ -3,10 +3,33 @@ import { parse } from 'date-fns';
 import type { Transaction, RawTransaction } from '../types/transaction';
 
 /**
- * Parsea una fecha en formato DD-MM-YYYY a objeto Date
+ * Parsea una fecha en formato DD-MM-YYYY o DD/MM/YYYY a objeto Date
  */
 function parseDate(dateString: string): Date {
-  return parse(dateString, 'dd-MM-yyyy', new Date());
+  if (!dateString) return new Date();
+  
+  // Limpiar espacios en blanco
+  const cleanedDate = dateString.trim();
+  
+  // Intentar con formato DD/MM/YYYY (barras)
+  if (cleanedDate.includes('/')) {
+    const parsed = parse(cleanedDate, 'dd/MM/yyyy', new Date());
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  
+  // Intentar con formato DD-MM-YYYY (guiones)
+  if (cleanedDate.includes('-')) {
+    const parsed = parse(cleanedDate, 'dd-MM-yyyy', new Date());
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  
+  // Si ningún formato funciona, devolver fecha actual como fallback
+  console.warn(`No se pudo parsear la fecha: "${dateString}"`);
+  return new Date();
 }
 
 /**
@@ -59,21 +82,31 @@ export function parseCSVContent(csvContent: string): Promise<Transaction[]> {
             console.warn('Errores en el parseo del CSV:', results.errors);
           }
           
-          const transactions = results.data
+          const validTransactions = results.data
             .filter((row) => {
               // Filtrar filas vacías o con datos incompletos
-              return row['Fecha contable'] && row['Importe'] !== undefined;
+              const isValid = row['Fecha contable'] && row['Importe'] !== undefined;
+              if (!isValid) {
+                console.debug('Fila filtrada por datos incompletos:', row);
+              }
+              return isValid;
             })
             .map(mapRawToTransaction)
             .filter((transaction) => {
               // Filtrar transacciones con fechas inválidas
-              return !isNaN(transaction.fechaContable.getTime());
+              const dateIsValid = !isNaN(transaction.fechaContable.getTime());
+              if (!dateIsValid) {
+                console.warn('Transacción filtrada por fecha inválida:', transaction);
+              }
+              return dateIsValid;
             });
           
-          // Ordenar por fecha (más reciente primero)
-          transactions.sort((a, b) => b.fechaContable.getTime() - a.fechaContable.getTime());
+          console.log(`CSV procesado: ${results.data.length} filas brutas → ${validTransactions.length} transacciones válidas`);
           
-          resolve(transactions);
+          // Ordenar por fecha (más reciente primero)
+          validTransactions.sort((a, b) => b.fechaContable.getTime() - a.fechaContable.getTime());
+          
+          resolve(validTransactions);
         } catch (error) {
           reject(new Error(`Error al procesar el CSV: ${error instanceof Error ? error.message : 'Error desconocido'}`));
         }

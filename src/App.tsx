@@ -1,7 +1,7 @@
 import { useFinancialStore } from './store/financialStore';
 import Layout from './components/Layout/Layout';
 import FileUploader from './components/FileUploader/FileUploader';
-import DashboardView from './components/Dashboard/DashboardView';
+import TabbedDashboardView from './components/Dashboard/TabbedDashboardView';
 
 function App() {
   const { transactions, isLoading } = useFinancialStore();
@@ -18,7 +18,7 @@ function App() {
   // Una vez que hay datos, mostrar el dashboard
   return (
     <Layout>
-      <DashboardView />
+      <TabbedDashboardView />
     </Layout>
   );
 }
