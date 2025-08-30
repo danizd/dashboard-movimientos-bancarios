@@ -33,24 +33,36 @@ export default function OverviewTab() {
     
     const months = eachMonthOfInterval({ start: firstDate, end: lastDate });
     
-    // Si hay más de 36 meses (3 años), usar solo los últimos 36 para mejor visualización
-    const monthsToShow = months.length > 36 ? months.slice(-36) : months;
-    const isLimited = months.length > 36;
+    // Si hay más de 50 meses (4 años y 2 meses), usar solo los últimos 50 para mejor visualización
+    const monthsToShow = months.length > 50 ? months.slice(-50) : months;
+    const isLimited = months.length > 50;
     
     const monthlyData = monthsToShow.map(month => {
       const monthStart = startOfMonth(month);
       const monthEnd = endOfMonth(month);
-      
-      const monthTransactions = sortedTransactions.filter(t => 
-        t.fechaContable >= monthStart && t.fechaContable <= monthEnd
-      );
-      
-      const lastTransaction = monthTransactions[monthTransactions.length - 1];
-      const balance = lastTransaction ? lastTransaction.saldo : 0;
-      
+
+      // Para cada cuenta, buscar la PRIMERA transacción en el mes
+      // Si no hay, usar la última transacción anterior a ese mes
+      const cuentas = Array.from(new Set(sortedTransactions.map(t => t.cuenta)));
+      const saldoTotalMes = cuentas.reduce((total, cuenta) => {
+        // Buscar la primera transacción de la cuenta en el mes
+        const transaccionesEnMes = sortedTransactions.filter(t => t.cuenta === cuenta && t.fechaContable >= monthStart && t.fechaContable <= monthEnd);
+        if (transaccionesEnMes.length > 0) {
+          // Tomar la transacción más antigua del mes
+          const transaccionMasAntigua = transaccionesEnMes.reduce((earliest, t) => t.fechaContable < earliest.fechaContable ? t : earliest, transaccionesEnMes[0]);
+          return total + transaccionMasAntigua.saldo;
+        } else {
+          // Buscar la última transacción anterior al mes
+          const transaccionesPrevias = sortedTransactions.filter(t => t.cuenta === cuenta && t.fechaContable < monthStart);
+          if (transaccionesPrevias.length === 0) return total;
+          const transaccionMasReciente = transaccionesPrevias.reduce((latest, t) => t.fechaContable > latest.fechaContable ? t : latest, transaccionesPrevias[0]);
+          return total + transaccionMasReciente.saldo;
+        }
+      }, 0);
+
       return {
         x: format(month, 'MMM yyyy'),
-        y: Math.round(balance),
+        y: Math.round(saldoTotalMes),
       };
     });
 
@@ -60,7 +72,7 @@ export default function OverviewTab() {
       data: monthlyData,
     }];
 
-    return { 
+    return {
       balanceEvolutionData: data,
       balanceMonthsInfo: {
         totalMonths: months.length,

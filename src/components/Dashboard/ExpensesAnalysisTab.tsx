@@ -43,46 +43,44 @@ export default function ExpensesAnalysisTab() {
       .slice(0, 15);
   }, [filteredTransactions]);
 
-  // Datos para el Sunburst (categoría principal y subcategorías)
-  const sunburstData = useMemo(() => {
+  // Datos para gráfico de barras agrupadas (categoría y subcategoría)
+  const groupedBarData = useMemo(() => {
+    // Agrupar por categoría y subcategoría
     const categoryData = filteredTransactions
       .filter(transaction => transaction.importe < 0)
       .reduce((acc, transaction) => {
         const category = transaction.categoria || 'Sin categoría';
         const subcategory = transaction.subcategoria || 'General';
-        
-        if (!acc[category]) {
-          acc[category] = {
-            total: 0,
-            subcategories: {}
-          };
-        }
-        
-        acc[category].total += Math.abs(transaction.importe);
-        acc[category].subcategories[subcategory] = 
-          (acc[category].subcategories[subcategory] || 0) + Math.abs(transaction.importe);
-        
+        if (!acc[category]) acc[category] = {};
+        acc[category][subcategory] = (acc[category][subcategory] || 0) + Math.abs(transaction.importe);
         return acc;
-      }, {} as Record<string, { total: number; subcategories: Record<string, number> }>);
+      }, {} as Record<string, Record<string, number>>);
 
-    const sunburstChildren = Object.entries(categoryData)
-      .map(([category, data]) => ({
-        name: category,
-        value: Math.round(data.total),
-        children: Object.entries(data.subcategories)
-          .map(([subcategory, value]) => ({
-            name: subcategory,
-            value: Math.round(value)
-          }))
-          .sort((a, b) => b.value - a.value)
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8);
+    // Obtener todas las subcategorías únicas
+    const subcategoriesSet = new Set<string>();
+    Object.values(categoryData).forEach(subs => {
+      Object.keys(subs).forEach(sub => subcategoriesSet.add(sub));
+    });
+    const subcategories = Array.from(subcategoriesSet);
 
-    return {
-      name: 'gastos',
-      children: sunburstChildren
-    };
+    // Formato para Nivo Bar agrupado
+    const data = Object.entries(categoryData)
+      .map(([category, subs]) => {
+        const entry: Record<string, any> = { categoria: category };
+        subcategories.forEach(sub => {
+          entry[sub] = Math.round(subs[sub] || 0);
+        });
+        return entry;
+      })
+      .sort((a, b) => {
+        // Ordenar por gasto total descendente
+        const totalA = subcategories.reduce((sum, sub) => sum + (a[sub] || 0), 0);
+        const totalB = subcategories.reduce((sum, sub) => sum + (b[sub] || 0), 0);
+        return totalB - totalA;
+      })
+      .slice(0, 8); // Top 8 categorías
+
+    return { data, subcategories };
   }, [filteredTransactions]);
 
   // Calcular rango de fechas para el calendario
@@ -287,39 +285,54 @@ export default function ExpensesAnalysisTab() {
         </Box>
       </Card>
 
-      {/* Gráfico Sunburst */}
+      {/* Gráfico de barras agrupadas por categoría y subcategoría */}
       <Card withBorder padding="lg" radius="md">
         <Title order={4} mb="md">Desglose por Categoría y Subcategoría</Title>
         <Box h={500}>
-          <ResponsiveSunburst
-            data={sunburstData}
-            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-            id="name"
-            value="value"
-            cornerRadius={2}
-            borderWidth={2}
-            borderColor={{ theme: 'background' }}
+          <ResponsiveBar
+            data={groupedBarData.data}
+            keys={groupedBarData.subcategories}
+            indexBy="categoria"
+            margin={{ top: 20, right: 50, bottom: 100, left: 80 }}
+            padding={0.3}
+            groupMode="grouped"
             colors={{ scheme: 'category10' }}
-            childColor={{ from: 'color', modifiers: [['brighter', 0.1]] }}
-            enableArcLabels={true}
-            arcLabelsSkipAngle={10}
-            arcLabelsTextColor={{ theme: 'background' }}
+            borderRadius={4}
+            borderWidth={1}
+            borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
+            axisTop={null}
+            axisRight={null}
+            axisBottom={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 45,
+            }}
+            axisLeft={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              format: (value) => formatCurrency(value),
+            }}
+            enableLabel={true}
+            labelSkipWidth={12}
+            labelSkipHeight={12}
+            labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
             animate={true}
             motionConfig="gentle"
-            tooltip={(props) => (
+            tooltip={({ id, value, color, indexValue }) => (
               <div
                 style={{
                   background: 'white',
                   padding: '12px 16px',
-                  border: `2px solid ${props.color}`,
+                  border: `2px solid ${color}`,
                   borderRadius: '8px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 }}
               >
-                <strong>{props.id}</strong>
+                <strong>{indexValue}</strong>
                 <br />
-                <span style={{ color: props.color }}>
-                  {formatCurrency(props.value)}
+                <span style={{ color }}>
+                  {id}: {formatCurrency(value as number)}
                 </span>
               </div>
             )}
