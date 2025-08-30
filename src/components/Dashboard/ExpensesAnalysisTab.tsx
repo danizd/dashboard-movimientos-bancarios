@@ -1,6 +1,5 @@
 import { Stack, Card, Title, Box, useMantineTheme, MultiSelect, Text } from '@mantine/core';
 import { ResponsiveBar } from '@nivo/bar';
-import { ResponsiveCalendar } from '@nivo/calendar';
 import { ResponsiveSunburst } from '@nivo/sunburst';
 import { ResponsiveLine } from '@nivo/line';
 import { useFinancialStore } from '../../store/financialStore';
@@ -84,71 +83,8 @@ export default function ExpensesAnalysisTab() {
   }, [filteredTransactions]);
 
   // Calcular rango de fechas para el calendario
-  const { minDate, maxDate, isLimitedRange } = useMemo(() => {
-    if (filteredTransactions.length === 0) {
-      const currentYear = new Date().getFullYear();
-      return {
-        minDate: `${currentYear}-01-01`,
-        maxDate: `${currentYear}-12-31`,
-        isLimitedRange: false
-      };
-    }
-
-    const expenseTransactions = filteredTransactions.filter(t => t.importe < 0);
-    if (expenseTransactions.length === 0) {
-      const currentYear = new Date().getFullYear();
-      return {
-        minDate: `${currentYear}-01-01`,
-        maxDate: `${currentYear}-12-31`,
-        isLimitedRange: false
-      };
-    }
-
-    const dates = expenseTransactions.map(t => t.fechaContable);
-    const min = new Date(Math.min(...dates.map(d => d.getTime())));
-    const max = new Date(Math.max(...dates.map(d => d.getTime())));
-    
-    // Si el rango es mayor a 3 años, limitar a los últimos 3 años
-    const rangeInYears = max.getFullYear() - min.getFullYear();
-    let finalMin = min;
-    let finalMax = max;
-    let isLimited = false;
-    
-    if (rangeInYears > 3) {
-      // Usar los últimos 3 años
-      finalMin = new Date(max.getFullYear() - 2, 0, 1); // 1 enero de hace 3 años
-      isLimited = true;
-    }
-    
-    return {
-      minDate: format(finalMin, 'yyyy-MM-dd'),
-      maxDate: format(finalMax, 'yyyy-MM-dd'),
-      isLimitedRange: isLimited
-    };
-  }, [filteredTransactions]);
 
   // Datos para el mapa de calor del calendario
-  const calendarData = useMemo(() => {
-    const minDateObj = new Date(minDate);
-    const maxDateObj = new Date(maxDate);
-    
-    const dailyExpenses = filteredTransactions
-      .filter(transaction => 
-        transaction.importe < 0 && 
-        transaction.fechaContable >= minDateObj && 
-        transaction.fechaContable <= maxDateObj
-      )
-      .reduce((acc, transaction) => {
-        const dateStr = format(transaction.fechaContable, 'yyyy-MM-dd');
-        acc[dateStr] = (acc[dateStr] || 0) + Math.abs(transaction.importe);
-        return acc;
-      }, {} as Record<string, number>);
-
-    return Object.entries(dailyExpenses).map(([date, value]) => ({
-      day: date,
-      value: Math.round(value)
-    }));
-  }, [filteredTransactions, minDate, maxDate]);
 
   // Datos para el gráfico de gastos por categoría por mes (líneas múltiples)
   const { availableCategoriesForTrend, expensesTrendData } = useMemo(() => {
@@ -285,60 +221,40 @@ export default function ExpensesAnalysisTab() {
         </Box>
       </Card>
 
-      {/* Gráfico de barras agrupadas por categoría y subcategoría */}
+      {/* Tabla de gastos más importantes (>600€) */}
       <Card withBorder padding="lg" radius="md">
-        <Title order={4} mb="md">Desglose por Categoría y Subcategoría</Title>
-        <Box h={500}>
-          <ResponsiveBar
-            data={groupedBarData.data}
-            keys={groupedBarData.subcategories}
-            indexBy="categoria"
-            margin={{ top: 20, right: 50, bottom: 100, left: 80 }}
-            padding={0.3}
-            groupMode="grouped"
-            colors={{ scheme: 'category10' }}
-            borderRadius={4}
-            borderWidth={1}
-            borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
-            axisTop={null}
-            axisRight={null}
-            axisBottom={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 45,
-            }}
-            axisLeft={{
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
-              format: (value) => formatCurrency(value),
-            }}
-            enableLabel={true}
-            labelSkipWidth={12}
-            labelSkipHeight={12}
-            labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-            animate={true}
-            motionConfig="gentle"
-            tooltip={({ id, value, color, indexValue }) => (
-              <div
-                style={{
-                  background: 'white',
-                  padding: '12px 16px',
-                  border: `2px solid ${color}`,
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                }}
-              >
-                <strong>{indexValue}</strong>
-                <br />
-                <span style={{ color }}>
-                  {id}: {formatCurrency(value as number)}
-                </span>
-              </div>
-            )}
-          />
+        <Title order={4} mb="md">Gastos más importantes (&gt;600€)</Title>
+        <Box h={300} style={{ overflowY: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: theme.colors.gray[1] }}>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Fecha</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Concepto</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Categoría</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Subcategoría</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Importe</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Cuenta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions
+                .filter(t => t.importe < -600)
+                .sort((a, b) => Math.abs(b.importe) - Math.abs(a.importe))
+                .map((t, idx) => (
+                  <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : theme.colors.gray[0] }}>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{format(t.fechaContable, 'dd-MM-yyyy')}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.concepto}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.categoria || 'Sin categoría'}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.subcategoria || 'General'}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee', color: theme.colors.red[6], fontWeight: 'bold' }}>{formatCurrency(Math.abs(t.importe))}</td>
+                    <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.cuenta}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </Box>
       </Card>
+  {/* ...existing code... */}
 
       {/* Gráfico de gastos por categoría por mes */}
       <Card withBorder padding="lg" radius="md">
@@ -461,70 +377,37 @@ export default function ExpensesAnalysisTab() {
         </Box>
       </Card>
 
-      {/* Mapa de calor del calendario */}
+      {/* Tabla de gastos más importantes (>600€) */}
       <Card withBorder padding="lg" radius="md">
-        <Title order={4} mb="md">Mapa de Calor de Gastos Diarios</Title>
-        
-        {isLimitedRange && (
-          <Box mb="sm">
-            <Text size="sm" c="dimmed">
-              Mostrando los últimos 3 años para mejor visualización. Rango completo disponible en otros gráficos.
-            </Text>
-          </Box>
-        )}
-        
-        <Box h={200} style={{ overflow: 'auto' }}>
-          <ResponsiveCalendar
-            data={calendarData}
-            from={minDate}
-            to={maxDate}
-            emptyColor="#eeeeee"
-            colors={[
-              '#ffebee',
-              '#ffcdd2',
-              '#ef9a9a',
-              '#e57373',
-              '#ef5350',
-              '#f44336',
-              '#e53935',
-              '#d32f2f',
-              '#c62828'
-            ]}
-            margin={{ top: 20, right: 40, bottom: 20, left: 40 }}
-            yearSpacing={40}
-            monthBorderColor="#ffffff"
-            dayBorderWidth={2}
-            dayBorderColor="#ffffff"
-            legends={[
-              {
-                anchor: 'bottom-right',
-                direction: 'row',
-                translateY: 36,
-                itemCount: 4,
-                itemWidth: 42,
-                itemHeight: 36,
-                itemsSpacing: 14,
-                itemDirection: 'right-to-left'
-              }
-            ]}
-            tooltip={({ day, value, color }) => (
-              <div
-                style={{
-                  background: 'white',
-                  padding: '12px 16px',
-                  border: `2px solid ${color}`,
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                }}
-              >
-                <strong>{format(new Date(day), 'dd/MM/yyyy')}</strong>
-                <br />
-                <span style={{ color }}>
-                  Gastos: {value ? formatCurrency(Number(value)) : '0 €'}
-                </span>
-              </div>
-            )}
-          />
+        <Title order={4} mb="md">Gastos más importantes (&gt;600€)</Title>
+        <Box h={300} style={{ overflowY: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: theme.colors.gray[1] }}>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Fecha</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Concepto</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Categoría</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Subcategoría</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Importe</th>
+                <th style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Cuenta</th>
+              </tr>
+            </thead>
+            <tbody>
+                {filteredTransactions
+                .filter(t => t.importe < -600)
+                .sort((a, b) => Math.abs(b.importe) - Math.abs(a.importe))
+                .map((t, idx) => (
+                  <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : theme.colors.gray[0] }}>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{format(t.fechaContable, 'dd-MM-yyyy')}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.concepto}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.categoria || 'Sin categoría'}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.subcategoria || 'General'}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee', color: theme.colors.red[6], fontWeight: 'bold' }}>{formatCurrency(Math.abs(t.importe))}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{t.cuenta}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </Box>
       </Card>
     </Stack>
