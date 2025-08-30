@@ -64,7 +64,7 @@ La aplicación está estructurada en tres pestañas principales que proporcionan
 *Dedicada a responder "¿En qué y cuándo gasto mi dinero?"*
 - **Gastos por Categoría**: Gráfico de barras horizontales de principales gastos
 - **Evolución Mensual por Categoría**: Análisis temporal con selector múltiple de categorías para comparativas
-- **Desglose Jerárquico**: Gráfico Sunburst por categoría y subcategoría
+- **Desglose por Categoría y Subcategoría**: Gráfico de barras agrupadas que muestra el importe por subcategoría dentro de cada categoría, facilitando la comparación visual y el análisis detallado.
 - **Mapa de Calor Calendario**: Patrones de gasto diarios para identificar tendencias (optimizado para 3 años)
 
 #### 🧾 **Pestaña 3: Todas las Transacciones**
@@ -303,7 +303,7 @@ Componente principal que orquesta las pestañas y mantiene los filtros globales 
 
 #### **🔬 ExpensesAnalysisTab**
 - Gastos por categoría (barras horizontales)
-- Gráfico Sunburst jerárquico por categoría/subcategoría
+- Gráfico de barras agrupadas por categoría y subcategoría (sustituye al Sunburst para mayor claridad)
 - Mapa de calor de calendario para patrones de gasto
 
 #### **🧾 TransactionsTable**
@@ -496,7 +496,6 @@ Las contribuciones son bienvenidas. Para contribuir:
 ### **Próximas Características**
 - [ ] **Exportación de Reportes**: PDF y Excel con datos de cada pestaña
 - [ ] **Comparativas Personalizadas**: Selección de períodos específicos
-- [ ] **Categorización Automática**: IA para clasificar transacciones nuevas
 - [ ] **Presupuestos**: Gestión de presupuestos por categoría con alertas
 - [ ] **Predicciones**: Proyecciones de gastos basadas en histórico
 - [ ] **Múltiples Bancos**: Soporte para diferentes formatos CSV
@@ -584,50 +583,11 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ---
 
 ⭐ **¡Si te gusta este proyecto, no olvides darle una estrella!** ⭐
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📦 Otros proyectos en el repositorio
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+En la carpeta raíz encontrarás también la aplicación **Clasifica_movimientos_bancarios**, una herramienta complementaria para la clasificación automática de movimientos bancarios. Consulta su propio README para más detalles y uso específico.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+⭐ **¡Si te gusta este proyecto, no olvides darle una estrella!** ⭐
