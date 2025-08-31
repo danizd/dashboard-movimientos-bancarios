@@ -40,14 +40,8 @@ Una aplicación web moderna y completa para el análisis de finanzas personales 
 - **Carga Eficiente**: Procesamiento optimizado de grandes datasets con filtrado inteligente
 - **Memoria Optimizada**: useMemo estratégico para evitar recálculos innecesarios
 
-### 🗂️ **Organización por Pestañas**rd Financiero Personal
 
-Una aplicación web moderna y completa para el análisis de finanzas personales construida con React, TypeScript y Mantine UI. Permite cargar, analizar y visualizar movimientos bancarios de forma intuitiva y profesional, organizados en pestañas especializadas.
-
-![Dashboard Preview](https://img.shields.io/badge/Status-Activo-success)
-![Version](https://img.shields.io/badge/Version-2.1.0-blue)
-![React](https://img.shields.io/badge/React-19.1.1-61dafb)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)
+### 🗂️ **Organización por Pestañas**
 
 ## ✨ Características Principales
 
@@ -57,14 +51,16 @@ La aplicación está estructurada en tres pestañas principales que proporcionan
 #### 📊 **Pestaña 1: Resumen General**
 *Vista principal que responde a "¿Cómo voy?"*
 - **Tarjetas KPI**: Saldo actual, Ingresos, Gastos y Ahorro del período
+- **Cards de saldo por cuenta**: Visualización individual del saldo final de cada cuenta bancaria en formato card Mantine, con etiqueta "Saldo [nombre de cuenta]" y estilo profesional.
 - **Gráfico Ingresos vs Gastos**: Barras mensuales con línea de ahorro superpuesta y leyenda horizontal optimizada en la parte superior
 - **Evolución del Saldo**: Línea temporal del balance financiero por mes con optimización automática para grandes datasets
 
 #### 🔬 **Pestaña 2: Análisis de Gastos**
-*Dedicada a responder "¿En qué y cuándo gasto mi dinero?"*
 - **Gastos por Categoría**: Gráfico de barras horizontales de principales gastos
 - **Evolución Mensual por Categoría**: Análisis temporal con selector múltiple de categorías para comparativas
 - **Desglose por Categoría y Subcategoría**: Gráfico de barras agrupadas que muestra el importe por subcategoría dentro de cada categoría, facilitando la comparación visual y el análisis detallado.
+- **Gastos por Año**: Gráfico y tabla de gastos anuales con filtro de categorías y tabla completa sin scroll.
+- **Tabla de gastos más importantes**: Listado de gastos superiores a 600€.
 - **Mapa de Calor Calendario**: Patrones de gasto diarios para identificar tendencias (optimizado para 3 años)
 
 #### 🧾 **Pestaña 3: Todas las Transacciones**
@@ -298,12 +294,15 @@ Componente principal que orquesta las pestañas y mantiene los filtros globales 
 
 #### **📊 OverviewTab**
 - Incluye `KpiCards` para métricas principales
+- Cards de saldo por cuenta (formato Mantine)
 - Gráfico combinado de ingresos vs gastos con línea de ahorro
 - Evolución mensual del saldo
 
 #### **🔬 ExpensesAnalysisTab**
 - Gastos por categoría (barras horizontales)
 - Gráfico de barras agrupadas por categoría y subcategoría (sustituye al Sunburst para mayor claridad)
+- Gastos por año con filtro de categorías y tabla completa
+- Tabla de gastos más importantes (>600€)
 - Mapa de calor de calendario para patrones de gasto
 
 #### **🧾 TransactionsTable**

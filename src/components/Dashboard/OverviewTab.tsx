@@ -1,4 +1,5 @@
 import { Stack, Card, Title, Box, Text, useMantineTheme } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { ResponsiveLine } from '@nivo/line';
 import { ResponsiveBar } from '@nivo/bar';
 import { useFinancialStore } from '../../store/financialStore';
@@ -7,8 +8,27 @@ import { useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachMonthOfInterval } from 'date-fns';
 
 export default function OverviewTab() {
+
   const { filteredTransactions } = useFinancialStore();
   const theme = useMantineTheme();
+
+  // Calcular saldo final por cuenta (debe ir después de filteredTransactions)
+  const finalBalancesByAccount = useMemo(() => {
+    if (filteredTransactions.length === 0) return [];
+    // Agrupar por cuenta y tomar la última transacción (por fecha)
+    const cuentas = Array.from(new Set(filteredTransactions.map(t => t.cuenta)));
+    return cuentas
+      .map(cuenta => {
+        const transaccionesCuenta = filteredTransactions.filter(t => t.cuenta === cuenta);
+        if (transaccionesCuenta.length === 0) return undefined;
+        const ultimaTransaccion = transaccionesCuenta.reduce((latest, t) => t.fechaContable > latest.fechaContable ? t : latest, transaccionesCuenta[0]);
+        return {
+          cuenta,
+          saldo: ultimaTransaccion.saldo
+        };
+      })
+      .filter((item): item is { cuenta: string; saldo: number } => !!item);
+  }, [filteredTransactions]);
 
   // Función para formatear moneda
   const formatCurrency = (value: number) => {
@@ -156,6 +176,26 @@ export default function OverviewTab() {
 
   return (
     <Stack gap="lg">
+      {/* Saldos finales por cuenta como cards estilo KPIs */}
+      <Box mb="md">
+        <Stack gap="md" style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {finalBalancesByAccount.map(({ cuenta, saldo }) => (
+            <Card key={cuenta} withBorder padding="lg" radius="md" className="mantine-Card-root" style={{ minWidth: 220, flex: '1 1 220px' }}>
+              <Group style={{ justifyContent: 'space-between' }}>
+                <div>
+                  <Text size="xs" c="dimmed" style={{ textTransform: 'uppercase', fontWeight: 700 }}>
+                    Saldo {cuenta}
+                  </Text>
+                  <Text size="xl" fw={700} mt="xs" style={{ color: theme.colors.blue[6] }}>
+                    {formatCurrency(saldo)}
+                  </Text>
+                </div>
+                {/* Icono opcional, se puede usar IconWallet si se desea */}
+              </Group>
+            </Card>
+          ))}
+        </Stack>
+      </Box>
       {/* Tarjetas de KPIs */}
       <KpiCards />
 
